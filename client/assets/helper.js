@@ -1,3 +1,4 @@
+
 function registerDisplay(){
     $('#login-page').hide()
     $('#main-page').hide()
@@ -5,9 +6,10 @@ function registerDisplay(){
     $('#register-page').show()
 }
 function editTodoDisplay(id){
+    $('#todos-from-edit').remove()
     $.ajax({
         method: 'GET',
-        url: `http://localhost:3000/todos/${id}`,
+        url: `https://tuyetuyefancytodo.herokuapp.com/todos/${id}`,
         headers: {
             token : localStorage.getItem('access_token')
         }
@@ -17,7 +19,7 @@ function editTodoDisplay(id){
         $('#main-page').hide()
         $('#register-page').hide()
         $('#edit-todo-page').show()
-        $('#edit-todos-form').append(`<form class="form-inline" id="todos-form-edit" method="POST">
+        $('#edit-todos-form').show().empty().append(`<form class="form-inline" id="todos-form-edit" method="POST">
     <label class="sr-only" for="title">Title</label>
     <input type="text" class="form-control mb-2 mr-sm-2" id="title-edit" name="title" placeholder="Title">
   
@@ -55,12 +57,15 @@ function editTodoDisplay(id){
     .fail((xhr, textStatus) => {
         console.log(xhr, textStatus);
     })
+    .always(() => {
+        $('#todos-from-edit').empty()
+    })
 }
 function onSignIn(googleUser) {
     console.log(`okk`);
     var id_token = googleUser.getAuthResponse().id_token;
     $.ajax({
-        url: 'http://localhost:3000/user/googleLogin',
+        url: 'https://tuyetuyefancytodo.herokuapp.com/user/googleLogin',
         method: 'POST',
         data: {
             googleToken: id_token
@@ -79,21 +84,26 @@ function login(){
     const password = $('#login-password').val()
     $.ajax({
         method: 'POST',
-        url: 'http://localhost:3000/user/login',
+        url: 'https://tuyetuyefancytodo.herokuapp.com/user/login',
         data: {
             email,
             password
         }
     })
     .done(value => {
-        console.log(value);
-        localStorage.setItem('access_token', value)
+       console.log(value);
+       localStorage.setItem('access_token', value)
+       swal({
+        text: 'Login success',
+        title: 'Welcome',
+        icon: 'success'
+      })
        mainDisplay()
     //    todo()
     })
     .fail((xhr, textStatus) => {
         console.log(xhr);
-        // alert(xhr.responseText)
+        swal('Error', xhr.responseText)
     })
     .always(() => {
         $('#login-email').val('')
@@ -108,7 +118,7 @@ function register(){
     const password = $('#register-password').val()
     $.ajax({
         method: 'post',
-        url: 'http://localhost:3000/user/register',
+        url: 'https://tuyetuyefancytodo.herokuapp.com/user/register',
         data: {
             email,
             name,
@@ -117,12 +127,16 @@ function register(){
     })
     .done(value => {
         console.log(value);
-        // alert(`Account as email ${value.email}`)
+        swal({
+            text: 'Please Login for use our app',
+            title: 'Register Success',
+            icon: 'success'
+          })
         loginDisplay()
     })
     .fail((xhr, textStatus) => {
-        // alert(xhr.responseText)
-        console.log(error);
+        swal('Error', xhr.responseText)
+        console.log(xhr.responseText);
     })
     .always(() => {
         $('#register-name').val('')
@@ -131,13 +145,25 @@ function register(){
     })
 }
 function logout(){
-    localStorage.removeItem("access_token");
-    var auth2 = gapi.auth2.getAuthInstance();
-    auth2.signOut().then(function () {
-    console.log('User signed out.');
-    });
-    loginDisplay()
-        // ini untuk google log out
+    swal({
+        title: 'Logout',
+        icon: 'info',
+        text: 'Are you sure wanna to logout?',
+        buttons: true,
+        dangerMode: true
+      })
+        .then(value => {
+          if (value) {
+            localStorage.clear()
+            localStorage.removeItem("access_token");
+            // ini untuk google log out
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+            console.log('User signed out.');
+            });
+            loginDisplay()
+          }
+        })
 }
 function mainDisplay(){
     $('#edit-todo-page').hide()
@@ -159,7 +185,7 @@ function createTodo(){
     const due_date = $('#due_date').val()
     $.ajax({
         method: 'POST',
-        url: 'http://localhost:3000/todos',
+        url: 'https://tuyetuyefancytodo.herokuapp.com/todos',
         data: {
             title,
             description,
@@ -172,9 +198,15 @@ function createTodo(){
     })
     .done(value => {
         // todo()
+        swal({
+            text: 'Todo has been added',
+            title: 'Success',
+            icon: 'success'
+        })
         mainDisplay()
     })
     .fail((xhr, textStatus) => {
+        swal('Error', xhr.responseText)
         console.log(xhr.responseText);
     })
     .always(_ => {
@@ -187,7 +219,7 @@ function createTodo(){
 function todo() {
     $('#table-todo').empty()
     $.ajax({
-        url: 'http://localhost:3000/todos',
+        url: 'https://tuyetuyefancytodo.herokuapp.com/todos',
         method: 'GET',
         headers: {
             token: localStorage.getItem('access_token')
@@ -207,7 +239,7 @@ function todo() {
             <td>${todo.description}</td>
             <td>${todo.status}</td>
             <td>${todo.due_date}</td>
-            <td><button onClick="deleteTodo(${todo.id})" class="btn btn-warning">Delete</button> <button onClick="editTodoDisplay(${todo.id})" class="btn btn-success">Edit</button></td>
+            <td><button onClick="deleteTodo(${todo.id})" class="btn btn-danger">Delete</button> <button onClick="editTodoDisplay(${todo.id})" class="btn btn-primary">Edit</button></td>
                 </tr>`);
         })
     })
@@ -217,7 +249,7 @@ function todo() {
 }
 function deleteTodo(id){
     $.ajax({
-        url: `http://localhost:3000/todos/${id}`,
+        url: `https://tuyetuyefancytodo.herokuapp.com/todos/${id}`,
         method: 'DELETE',
         headers: {
             token: localStorage.getItem('access_token')
@@ -237,7 +269,7 @@ function editTodo(id){
     const due_date = $('#due_date-edit').val()
     $.ajax({
         method: 'PUT',
-        url: "http://localhost:3000/todos/" + `${id}`,
+        url: "https://tuyetuyefancytodo.herokuapp.com/todos/" + `${id}`,
         data: {
             title,
             description,

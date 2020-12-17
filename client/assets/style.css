@@ -1,9 +1,23 @@
-*{
-    background-image: url("https://img.uxfree.com/wp-content/uploads/2016/08/macro-plex-4k-motion-background-loop.jpg");
-}
+/* *{
+    padding: 10px;
+} */
 table{
     color: white;
 }
 h1{
     color: cornflowerblue;
+    text-align: center;
 }
+.h1-login{
+    font-family: "URW Chancery L";
+    text-align: center;
+    margin-top: 10px;
+}
+.h2-login{
+    font-family: monospace;
+    text-align: center;
+    margin-top: 10px;
+}
+/* .g-signin2{
+    padding: 0px;
+} */

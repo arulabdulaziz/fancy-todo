@@ -3,7 +3,6 @@ const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client(process.env.googleClient);
 const Bcrypt = require('../helper/bcrypt')
 const jwt = require('jsonwebtoken');
-const { create } = require('./todoController');
 class UserController{
     static register(req, res, next){
         const obj = {
